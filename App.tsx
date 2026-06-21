@@ -1,5 +1,5 @@
 import {useRef, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Pressable } from "react-native";
 import MapView, { Marker, Region } from "react-native-maps";
 
 const points = [
@@ -52,6 +52,8 @@ const points = [
   longitude: 4.905,
 },
 ];
+
+
 
 function getIcon(category: string) {
   switch (category) {
@@ -106,6 +108,7 @@ function createClusters(items: Point[], precision: number) {
 }
 
 export default function App() {
+  const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState<Region>({
     latitude: 51.889,
@@ -160,7 +163,7 @@ const clusters = createClusters(points, precision);
           latitude: point.latitude,
           longitude: point.longitude,
         }}
-        title={point.title}
+        onPress={() => setSelectedPoint(point)}
       >
         <View style={styles.marker}>
           <Text style={styles.icon}>{getIcon(point.category)}</Text>
@@ -168,9 +171,26 @@ const clusters = createClusters(points, precision);
       </Marker>
     ))}
       </MapView>
+    {selectedPoint && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{selectedPoint.title}</Text>
+
+          <Text style={styles.cardCategory}>
+            {getIcon(selectedPoint.category)} {selectedPoint.category}
+          </Text>
+
+          <Pressable
+            style={styles.closeButton}
+            onPress={() => setSelectedPoint(null)}
+          >
+            <Text style={styles.closeText}>Close</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
-}
+} 
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -185,9 +205,7 @@ marker: {
   justifyContent: "center",
   borderWidth: 3,
   borderColor: "white",
-
   elevation: 8,
-
   shadowColor: "#000",
   shadowOpacity: 0.3,
   shadowRadius: 5,
@@ -214,4 +232,41 @@ icon: {
     fontSize: 20,
     fontWeight: "bold",
   },
+  card: {
+  position: "absolute",
+  left: 16,
+  right: 16,
+  bottom: 24,
+  backgroundColor: "white",
+  padding: 18,
+  borderRadius: 20,
+  elevation: 10,
+},
+
+cardTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  color: "#111827",
+},
+
+cardCategory: {
+  marginTop: 6,
+  fontSize: 16,
+  color: "#4b5563",
+},
+
+closeButton: {
+  marginTop: 14,
+  alignSelf: "flex-start",
+  backgroundColor: "#2563eb",
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  borderRadius: 12,
+},
+
+closeText: {
+  color: "white",
+  fontWeight: "bold",
+},
+  
 });
